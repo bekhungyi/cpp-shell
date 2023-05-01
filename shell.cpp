@@ -217,7 +217,6 @@ int replaceOne(string element)
     string secondParam = ft_trim(element);
     getFirstArg(firstParam);
 
-    cout << firstParam << " : " << secondParam << endl;
     int i = 0;
     while (firstParam[i] != '\0')
     {
