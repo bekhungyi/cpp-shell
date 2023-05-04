@@ -35,10 +35,12 @@ void getFirstArg(string& element)
 string ft_trim(string command)
 {
     int pos = command.find(' ');
-    if (pos != string::npos) {
+    if (pos != string::npos)
+    {
         return command.substr(pos+1);
     }
-    else {
+    else
+    {
         return "";
     }
 }
@@ -210,11 +212,11 @@ int ft_delete(string element)
     return 0;
 }
 
-int replaceOne(string element)
+int replaceOne(string firstParam)
 {
-    cout << element << endl;
-    string firstParam = element;
-    string secondParam = ft_trim(element);
+    cout << firstParam << endl;
+    // string firstParam = element;
+    string secondParam = ft_trim(firstParam);
     getFirstArg(firstParam);
 
     int i = 0;
