@@ -25,6 +25,7 @@ int argCount(string command)
 void getFirstArg(string& element)
 {
     int i = 0;
+
     while (element[i] != ' ' && element[i] != '\0')
     {
         i++;
@@ -301,7 +302,8 @@ int main()
         argc = argCount(command);
         element = ft_trim(command);
         getFirstArg(command);
-        // cout << "Command is " << command << endl;
+        cout << "Command is " << command << endl;
+        // cout << "New command is " << newCommand << endl;
         // cout << "Element is " << element << endl;
         // cout << "ArgC is " << argc << endl << endl;
 

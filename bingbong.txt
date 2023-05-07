@@ -1,0 +1,147 @@
+# load
+$ load filename.csv
+Reads the file named filename and parses its contents and stores it into arrays or vectors.
+#
+# store
+$ store filename.csv
+Save the active array or vectors into a csv formatted file with the name filename.
+#
+# clone
+$ clone file1.csv file2.csv 
+Create a copy of file1 and name it file2.
+#
+# html
+$ html filename.html 
+Generates an HTML document for the loaded data and store it in the entered file
+$ html file1.csv file2.html 
+The program should read the a.csv file and convert it to an html table with proper column name and format.
+#
+# min
+$ min 
+display the minimum of all the columns. 
+$ min column
+display the minimum grade for the entered column
+#
+# max
+$ max 
+displays the maximum values and the names for all column
+$ max column 
+displays the maximum value for the entered column
+#
+# median
+$ median 
+displays the medians for the number columns only
+$ median column
+displays the median of the entered column
+#
+# mean
+$ mean 
+displays means of all the columns
+$ mean column
+displays the mean of the entered column
+#
+# variance
+$ variance 
+displays variance of all the columns
+$ variance column 
+displays the variance of the entered column
+#
+# stdv
+$ stdv 
+displays stdv of all the columns
+$ stdv column
+displays the stdv of the entered column
+#
+# add
+$ add column1 column2
+displays a column resulted from adding the two columns
+#
+# sub
+$ sub column1 column2
+displays a column resulted from subtracting the column1 from column2
+#
+# corr
+$ corr column1 column2
+Computes the correlation between two columns using Pearson correlation
+#
+# regression
+$ regression column
+compute the linear regression line formula for a selected column
+#
+# show
+$ show 
+displays the data read from the file
+$ show column
+displays the entered column
+#
+# titles
+$ titles
+displays the titles of all the columns for the file
+#
+# report
+$ report 
+displays a report that shows all the statistics for all the columns
+#
+# rows
+$ rows
+displays the number of rows loaded
+#
+# columns
+$ columns 
+displays the number of columns loaded
+#
+# vhisto
+$ vhisto column
+displays a text histogram for the entered column. Frequency of the data is the y axis.
+#
+# hhisto
+$ hhisto column
+displays a histogram for the Math column. Frequency of the data is the x axis.
+#
+# sort
+$ sort column
+sort the data using the Math column value. 
+#
+# man
+$ man command 
+display the entered command and what it does.
+#
+# help
+$ help 
+display the commands available and how to use them.
+#
+# oddrows
+$ oddrows 
+display the odd rows of the data.
+#
+# evenrows
+$ evenrows 
+displays the even rows of the data.
+#
+# primes
+$ primes column
+display the prime numbers in the entered column.
+#
+# delete occurrence
+$ delete occurrence column value 
+delete every row that the the column entered has the entered value
+#
+# delete row
+$ delete row number
+deletes the entered row of the loaded data. 
+#
+# delete column
+$ delete column name 
+deletes the entered
+#
+# insert row
+$ insert row data
+It will insert the values to the data in memory.The data must have the same format and order of the 
+columns in the loaded data in the memory.
+#
+# replace
+$ replace val1 val2
+replaces every number = val1 in all the columns with val2
+$ replace column val1 val2 
+replaces every val1 with val2 in the entered column.
+#
