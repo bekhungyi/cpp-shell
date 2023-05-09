@@ -1,34 +1,34 @@
-# load
+# load#
 $ load filename.csv
 Reads the file named filename and parses its contents and stores it into arrays or vectors.
 #
-# store
+# store#
 $ store filename.csv
 Save the active array or vectors into a csv formatted file with the name filename.
 #
-# clone
+# clone#
 $ clone file1.csv file2.csv 
 Create a copy of file1 and name it file2.
 #
-# html
+# html#
 $ html filename.html 
 Generates an HTML document for the loaded data and store it in the entered file
 $ html file1.csv file2.html 
 The program should read the a.csv file and convert it to an html table with proper column name and format.
 #
-# min
+# min#
 $ min 
 display the minimum of all the columns. 
 $ min column
 display the minimum grade for the entered column
 #
-# max
+# max#
 $ max 
 displays the maximum values and the names for all column
 $ max column 
 displays the maximum value for the entered column
 #
-# median
+# median#
 $ median 
 displays the medians for the number columns only
 $ median column
@@ -122,24 +122,24 @@ displays the even rows of the data.
 $ primes column
 display the prime numbers in the entered column.
 #
-# delete occurrence
+# delete occurrence#
 $ delete occurrence column value 
 delete every row that the the column entered has the entered value
 #
-# delete row
+# delete row#
 $ delete row number
 deletes the entered row of the loaded data. 
 #
-# delete column
+# delete column#
 $ delete column name 
 deletes the entered
 #
-# insert row
+# insert row#
 $ insert row data
 It will insert the values to the data in memory.The data must have the same format and order of the 
 columns in the loaded data in the memory.
 #
-# replace
+# replace#
 $ replace val1 val2
 replaces every number = val1 in all the columns with val2
 $ replace column val1 val2 

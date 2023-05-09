@@ -52,7 +52,7 @@ int ft_man(string element)
     {
         while (getline(file, line))
         {
-            if (line.substr(0, element.size() + 2) == "# " + element)
+            if (line.substr(0, element.size() + 3) == "# " + element + "#")
             {
                 while (getline(file, line) && line[0] != '#')
                 {
