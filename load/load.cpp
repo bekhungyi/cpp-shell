@@ -3,18 +3,16 @@
 #include <iomanip>
 #include <string>
 #include <vector>
-#include <tuple>
 
 using namespace std;
 
 struct s_data
 {
-    int     index;
-    string  id;
-    float   age;
-    float   math;
-    float   science;
-    float   malay;
+    string id;
+    float age;
+    float math;
+    float science;
+    float malay;
 };
 
 string getFirstParameter(string str)
@@ -69,14 +67,17 @@ void printData(int cols, int rows, const vector<s_data *> data)
     }
 }
 
-void printSum(int cols, int rows, const vector<s_data *> data)
+void printSum(int cols, int rows, vector<string> titles, vector<vector<float>> ndata)
 {
     int sum = 0;
 
     for (int r = 0; r < rows; r++)
 	{
-        s_data line = *data[r];
-        sum = sum + line.age;
+        for (int c = 0; c < cols; c++)
+		{
+			if (titles[c] == "Malay")
+				sum += ndata[r][c];
+		}
     }
     cout << "Sum: " << sum << endl;
 }
@@ -100,16 +101,14 @@ void    *initArr(int cols, int rows, vector<s_data> &data)
     return (0);
 }
 
-int ft_load(string filename, int paramCount, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<s_data *> &data)
+int ft_load(string filename, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
     ifstream file;
     file.open(filename);
-    if (!file.is_open())
-    {
+    if (!file.is_open()) {
         cout << "File not found!" << endl;
         return (0);
     }
-
     file >> cols;
     file >> rows;
     string str;
@@ -125,72 +124,67 @@ int ft_load(string filename, int paramCount, int &cols, int &rows, vector<string
 		str = trimStr(str);
         types.push_back(str);
     }
+
+	sdata.resize(rows);
+    ndata.resize(rows);
     for (int r = 0; r < rows; r++)
     {
-        s_data *line = new s_data;
+		sdata[r].resize(cols);
+        ndata[r].resize(cols);
         for (int c = 0; c < cols; c++)
         {
-            line->index = c;
-            string str;
-            if (c == 0)
+			float	num;
+            string	str;
+            if (types[c] == "number")
             {
                 file >> str;
-                str = trimStr(str);
-                line->id = str;
-                // cout << str << endl;
+                num = stof(trimStr(str));
+				ndata[r][c] = num;
+                // cout << ndata[r][c] << " ";
             }
-            else if (c == 1)
-            {
-                file >> str;
-                str = trimStr(str);
-                line->age = stof(str);
-                // cout << str << endl;
-            }
-            else if (c == 2)
-            {
-                file >> str;
-                str = trimStr(str);
-                line->math = stof(str);
-                // cout << str << endl;
-            }
-            else if (c == 3)
-            {
-                file >> str;
-                str = trimStr(str);
-                line->science = stof(str);
-                // cout << str << endl;
-            }
-            else if (c == 4)
-            {
-                file >> str;
-                str = trimStr(str);
-                line->malay = stof(str);
-                // cout << str << endl;
-            }
+			else
+			{
+				file >> str;
+				str = trimStr(str);
+				// cout << str << endl;
+				sdata[r][c] = str;
+				// cout << sdata[r][c] << endl;
+			}
         }
-        data.push_back(line);
+        // data.push_back(line);
     }
     file.close();
     return (1);
 }
 
-void    ft_store(string filename, int cols, int rows, const vector<s_data *> data)
+void    ft_store(string filename, int cols, int rows, vector<string> titles, vector<string> types, vector<vector<string>> sdata, vector<vector<float>> ndata)
 {
     ofstream file;
     file.open(filename);
-    if (!file.is_open())
-    {
-        cout << "File not found!" << endl;
-        return ;
-    }
+	for (int c = 0; c < cols; c++) {
+		file << titles[c];
+		if (c != cols - 1)
+			file << ", ";
+	}
+	file << endl;
+	for (int c = 0; c < cols; c++) {
+		file << types[c];
+		if (c != cols - 1)
+			file << ", ";
+	}
+	file << endl;
     for (int r = 0; r < rows; r++)
     {
-        s_data line = *data[r];
-        file << line.id << ", ";
-        file << line.age << ", ";
-        file << line.math << ", ";
-        file << line.science << ", ";
-        file << line.malay << endl;
+        for (int c = 0; c < cols; c++)
+		{
+			if (types[c] == "number")
+				file << ndata[r][c];
+			else
+				file << sdata[r][c];
+			if (c != cols - 1)
+				file << ", ";
+		}
+		file << endl;
     }
     file.close();
 }
@@ -219,88 +213,11 @@ void    ft_clone(string filename)
     outFile.close();
 }
 
-void    ft_html(string filename, int cols, int rows, vector<string> &titles, const vector<s_data *> data)
-{
-    ofstream file;
-    file.open(filename);
-    if (!file.is_open())
-    {
-        cout << "File not found!" << endl;
-        return ;
-    }
-    file << "<table>" << endl;
-	for (int r = 0; r < cols; r++)
-    {
-		titles[r] = "<th>" + titles[r] + "</th>";
-        file << titles[r] << endl;
-    }
-    for (int r = 0; r < rows; r++)
-    {
-        s_data line = *data[r];
-		file << "<tr>" << endl;
-        file << "<td>" + line.id + "</td>" << endl;
-        file << "<td>" << line.age << "</td>" << endl;
-        file << "<td>" << line.math << "</td>" << endl;
-        file << "<td>" << line.science << "</td>" << endl;
-        file << "<td>" << line.malay << "</td>" << endl;
-        file << "</tr>" << endl;
-    }
-    file << "</table>" << endl;
-    file.close();
-}
-
-void    ft_html2(string filename)
-{
-    string  file1, file2;
-    int cols, rows;
-    vector<string> titles;
-    vector<string> types;
-    vector<s_data *> data;
-
-    file1 = getFirstParameter(filename);
-    file2 = filename.substr(filename.find(" ") + 1, filename.length());
-
-    ft_load(file1, 1, cols, rows, titles, types, data);
-    ft_html(file2, cols, rows, titles, data);
-    cout << "Copy Finished" << endl;
-}
-
-void    ft_delete_occurrence(string parameter)
-{
-
-}
-
-void    ft_delete_column(string parameter)
-{
-
-}
-
-void    ft_delete_row(string parameter)
-{
-
-}
-
-void    ft_delete(string str)
-{
-    string  command, parameter;
-
-    command = getFirstParameter(str);
-    parameter = str.substr(str.find(" ") + 1, str.length());
-    if (command == "occurrence")
-        ft_delete_occurrence(parameter);
-    else if (command == "column")
-        ft_delete_column(parameter);
-    else if (command == "row")
-        ft_delete_row(parameter);
-    else
-        cout << "Command not found" << endl;
-}
-
 int main()
 {
 	int num_parameter;
 	string command, commandLine;
-	system("clear");
+	system("cls");
 
 	const vector<tuple<int, string, int, string, string>> CommandList{
 		make_tuple<>(1, "load", 2, "File is loaded.", "$ load filename.csv"),
@@ -363,14 +280,15 @@ int main()
 		}
 		else if (command == "load")
 		{
-			int                 cols, rows;
-			string              filename;
-			vector<string>      titles;
-			vector<string>      types;
-			vector<s_data *>    data;
+			int                 	cols, rows;
+			string					filename;
+			vector<string>			titles;
+			vector<string>			types;
+			vector<vector<string>>	sdata;
+			vector<vector<float>>	ndata;
 
 			filename = commandLine.substr(commandLine.find(" ") + 1);
-			if (ft_load(filename, num_parameter, cols, rows, titles, types, data))
+			if (ft_load(filename, cols, rows, titles, types, sdata, ndata))
 			{
 				printf("%s loaded\n", filename.c_str());
 				do
@@ -392,24 +310,18 @@ int main()
 						for(i = 0; i < cols; i++)
 							cout << titles[i] << " ";
 					}
-					else if (command == "list")
-					{
-						printData(cols, rows, data);
-					}
+					// else if (command == "list")
+					// {
+					// 	printData(cols, rows, data);
+					// }
                     else if (command == "sum")
 					{
-						printSum(cols, rows, data);
+						printSum(cols, rows, titles, ndata);
 					}
                     else if (command == "store")
-						ft_store(filename, cols, rows, data);
+						ft_store(filename, cols, rows, titles, types, sdata, ndata);
                     else if (command == "clone")
 						ft_clone(filename);
-					else if (command == "html" && num_parameter == 1)
-						ft_html(filename, cols, rows, titles, data);
-                    else if (command == "html" && num_parameter == 2)
-						ft_html2(filename); // sgmt fault. after running, loaded data is missing
-                    else if (command == "delete")
-						ft_delete(filename);
 					else if (command == "exit")
 						cout << "Exiting" << endl;
 					else
