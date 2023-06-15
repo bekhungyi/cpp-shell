@@ -131,17 +131,19 @@ int ft_load(string filename, int &cols, int &rows, vector<string> &titles, vecto
     {
 		sdata[r].resize(cols);
         ndata[r].resize(cols);
+		getline(file, str);
         for (int c = 0; c < cols; c++)
         {
 			float	num;
             string	str;
             if (types[c] == "string")
             {
-				file >> str;
+				// file >> str;
+				getline(file, str, ',');
+				cout << str;
 				str = trimStr(str);
-				// cout << str << endl;
 				sdata[r][c] = str;
-				cout << sdata[r][c] << " ";
+				// cout << sdata[r][c] << " ";
 
             }
 			else if (types[c] == "number")
@@ -150,7 +152,7 @@ int ft_load(string filename, int &cols, int &rows, vector<string> &titles, vecto
 				file >> str;
                 num = stof(trimStr(str));
 				ndata[r][c] = num;
-                cout << ndata[r][c] << " ";
+                // cout << ndata[r][c] << " ";
 			}
         }
 		cout << endl;
@@ -224,7 +226,7 @@ void	ft_names(int cols, int rows, vector<string> titles, vector<string> types, v
 	for (int r = 0; r <rows; r++)
 	{
 		for (int c = 0; c < cols; c++)
-		 if (titles[c] == "Location")
+		 if (titles[c] == "ID")
 		 	cout << sdata[r][c] << endl;
 	}
 }
@@ -492,6 +494,8 @@ int main()
 						cout << "Error: Do not load multiple files." << endl;
 					else if (command == "clear")
 						system("clear");
+					else if (command == "name")
+						ft_names(cols, rows, titles, types, sdata, ndata);
 					/****** Part 1 ******/
                     else if (command == "store")
 						ft_store(filename, cols, rows, titles, types, sdata, ndata);
