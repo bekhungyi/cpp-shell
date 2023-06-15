@@ -135,22 +135,25 @@ int ft_load(string filename, int &cols, int &rows, vector<string> &titles, vecto
         {
 			float	num;
             string	str;
-            if (types[c] == "number")
+            if (types[c] == "string")
             {
-                file >> str;
-                num = stof(trimStr(str));
-				ndata[r][c] = num;
-                // cout << ndata[r][c] << " ";
-            }
-			else
-			{
 				file >> str;
 				str = trimStr(str);
 				// cout << str << endl;
 				sdata[r][c] = str;
-				// cout << sdata[r][c] << endl;
+				cout << sdata[r][c] << " ";
+
+            }
+			else if (types[c] == "number")
+			{
+				// cout << "test" << endl;
+				file >> str;
+                num = stof(trimStr(str));
+				ndata[r][c] = num;
+                cout << ndata[r][c] << " ";
 			}
         }
+		cout << endl;
         // data.push_back(line);
     }
     file.close();
@@ -161,6 +164,9 @@ void    ft_store(string filename, int cols, int rows, vector<string> titles, vec
 {
     ofstream file;
     file.open(filename);
+
+	file << cols << endl;
+	file << rows << endl;
 	for (int c = 0; c < cols; c++) {
 		file << titles[c];
 		if (c != cols - 1)
@@ -213,6 +219,186 @@ void    ft_clone(string filename)
     outFile.close();
 }
 
+void	ft_names(int cols, int rows, vector<string> titles, vector<string> types, vector<vector<string>> sdata, vector<vector<float>> ndata)
+{
+	for (int r = 0; r <rows; r++)
+	{
+		for (int c = 0; c < cols; c++)
+		 if (titles[c] == "Location")
+		 	cout << sdata[r][c] << endl;
+	}
+}
+
+void	ft_print_row(string param, int cols, int rows, vector<string> titles, vector<string> types, vector<vector<string>> sdata, vector<vector<float>> ndata)
+{
+	int rowNum = stoi(param) - 1;
+
+	for (int r = 0; r <rows; r++)
+	{
+		if (r == rowNum)
+		{
+			for (int c = 0; c < cols; c++) {
+				if (types[c] == "string")
+					cout << sdata[r][c];
+				else
+					cout << ndata[r][c];
+				if (c != cols - 1)
+					cout << ", ";
+			}
+		}
+	}
+	cout << endl;
+}
+
+void    ft_html(string filename, int cols, int rows, vector<string> titles, vector<string> types, vector<vector<string>> sdata, vector<vector<float>> ndata)
+{
+    ofstream file;
+    file.open(filename);
+	file << "<style>table {border-collapse: collapse;}th, td {padding: 5px;border: 1px solid black;}</style>" << endl;
+    file << "<table>" << endl;
+	for (int r = 0; r < cols; r++) {
+		titles[r] = "<th>" + titles[r] + "</th>";
+        file << titles[r] << endl;
+    }
+    for (int r = 0; r < rows; r++) {
+		file << "<tr>" << endl;
+        for (int c = 0; c < cols; c++)
+		{
+			if (types[c] == "number")
+			{
+				string	tmp;
+				tmp = to_string(ndata[r][c]);
+				file << "<td>" + tmp + "</td>" << endl;
+			}
+			else
+				file << "<td>" + sdata[r][c] + "</td>" << endl;
+			
+		}
+        file << "</tr>" << endl;
+    }
+    file << "</table>" << endl;
+    file.close();
+}
+
+void    ft_html2(string filename)
+{
+	string file1, file2;
+	int	cols, rows;
+	vector<string> titles;
+	vector<string> types;
+	vector<vector<string>> sdata;
+	vector<vector<float>> ndata;
+
+	file1 = getFirstParameter(filename);
+	file2 = filename.substr(filename.find(" ") + 1, filename.length());
+	ft_load(file1, cols, rows, titles, types, sdata, ndata);
+	ft_html(file2, cols, rows, titles, types, sdata, ndata);
+}
+
+/****************************/
+/*			Part 4			*/
+/****************************/
+
+void	ft_delete_row(int r, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
+{
+	// for (int c = 0; c < cols; c++)
+	// {
+	// 	sdata[r][c] = "";
+	// 	ndata[r][c] = 0;
+	// }
+	sdata.erase(sdata.begin() + r); // Remove the row from sdata
+    ndata.erase(ndata.begin() + r); // Remove the row from ndata
+
+	rows -= 1;
+	cout << "Row deleted" << endl;
+}
+
+void	ft_delete_col(string param, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
+{
+	for (int r = 0; r < rows; r++)
+	{
+		for (int c = 0; c < cols; c++)
+		{
+			if (titles[c] == param)
+			{
+				sdata[r].erase(sdata[r].begin() + c);
+				ndata[r].erase(ndata[r].begin() + c);
+			}
+		}
+	}
+	for (int c = 0; c < cols; c++)
+	{
+		if (titles[c] == param)
+		{
+			titles.erase(titles.begin() + c);
+			types.erase(types.begin() + c);
+		}
+	}
+	cols -= 1;
+}
+
+void	ft_delete_occur(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
+{
+	int scol, srow;
+	string	colName = getFirstParameter(params);
+	float	colNum = stof(params.substr(params.find(" ") + 1, params.length()));
+
+	scol = cols;
+	srow = rows;
+	for (int r = srow - 1; r >= 0; r--)
+	{
+		for (int c = 0; c < scol; c++)
+		{
+			if (titles[c] == colName && ndata[r][c] == colNum)
+			{
+				// int rowNum = r - 1;
+				ft_delete_row(r, cols, rows, titles, types, sdata, ndata);
+				break;
+			}
+		}
+	}
+}
+
+void	ft_delete(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
+{
+	string	dltCommand = getFirstParameter(params);
+	params = params.substr(params.find(" ") + 1, params.length());
+	if (dltCommand == "occurrence")
+		ft_delete_occur(params, cols, rows, titles, types, sdata, ndata);
+	else if (dltCommand == "row")
+	{
+		int	rowNum = stoi(params) - 1;
+		ft_delete_row(rowNum, cols, rows, titles, types, sdata, ndata);
+	}
+	else if (dltCommand == "column")
+		ft_delete_col(params, cols, rows, titles, types, sdata, ndata);
+	else
+		cout << "Delete command invalid." << endl;
+}
+
+void	ft_insert(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
+{
+	string str;
+
+	sdata.resize(rows + 1, vector<string>(cols));
+	ndata.resize(rows + 1, vector<float>(cols));
+	rows += 1;
+	for (int c = 0; c < cols; c++)
+	{
+		str = getFirstParameter(params);
+		if (types[c] == "number")
+			ndata[rows - 1][c] = stof(str);
+		else
+			sdata[rows - 1][c] = str;
+		cout << "test" << endl;
+		params = params.substr(params.find(" ") + 1, params.length());
+	}
+}
+
+/****************************/
+/*			Main F.			*/
+/****************************/
+
 int main()
 {
 	int num_parameter;
@@ -261,7 +447,8 @@ int main()
 		make_tuple<>(39, "insert row", 7, "The stated values is inserted to the data in the memory with a new row. The total number of row has been increased by 1.", "insert row data"),
 		make_tuple<>(40, "replace", 3, "The specific number stated in all column is replaced by a new number stated.", "replace val1 val2"),
 		make_tuple<>(41, "replace", 4, "All of the specific number in a specific column stated is replaced by a new number stated.", "replace column val1 val2"),
-		make_tuple<>(42, "exit", 1, "The program is terminated.", "$ exit")};
+		make_tuple<>(42, "clear", 1, "Screen cleared.", "$ clear"),
+		make_tuple<>(43, "exit", 1, "The program is terminated.", "$ exit")};
 
 	cout << "Shell running..." << endl;
 	do
@@ -278,6 +465,8 @@ int main()
 			cout << "Exiting" << endl;
 			break;
 		}
+		else if (command == "clear")
+			system("cls");
 		else if (command == "load")
 		{
 			int                 	cols, rows;
@@ -290,38 +479,35 @@ int main()
 			filename = commandLine.substr(commandLine.find(" ") + 1);
 			if (ft_load(filename, cols, rows, titles, types, sdata, ndata))
 			{
-				printf("%s loaded\n", filename.c_str());
+				cout << filename << " is loaded." << endl;
 				do
 				{
 					cout << "$ ";
 					getline(cin, commandLine);
 					command = getFirstParameter(commandLine);
+					num_parameter = wordCounter(commandLine);
                     filename = commandLine.substr(commandLine.find(" ") + 1);
 
 					if (command == "load")
 						cout << "Error: Do not load multiple files." << endl;
-					else if (command == "size")
-					{
-						cout << "Columns: " << cols << endl;
-						cout << "Rows: " << rows << endl;
-					}
-					else if (command == "titles")
-					{
-						for(i = 0; i < cols; i++)
-							cout << titles[i] << " ";
-					}
-					// else if (command == "list")
-					// {
-					// 	printData(cols, rows, data);
-					// }
-                    else if (command == "sum")
-					{
-						printSum(cols, rows, titles, ndata);
-					}
+					else if (command == "clear")
+						system("clear");
+					/****** Part 1 ******/
                     else if (command == "store")
 						ft_store(filename, cols, rows, titles, types, sdata, ndata);
                     else if (command == "clone")
 						ft_clone(filename);
+					else if (command == "html" && num_parameter == 2)
+						ft_html(filename, cols, rows, titles, types, sdata, ndata);
+                    else if (command == "html" && num_parameter == 3)
+						ft_html2(filename);
+					
+					/****** Part 4 ******/
+					else if (command == "delete" && (num_parameter == 3 || num_parameter == 4))
+						ft_delete(filename, cols, rows, titles, types, sdata, ndata);
+					else if (command == "insert")
+						ft_insert(filename, cols, rows, titles, types, sdata, ndata);
+
 					else if (command == "exit")
 						cout << "Exiting" << endl;
 					else
@@ -329,12 +515,12 @@ int main()
 				} while (command != "exit");
 			}
 		}
-		if (i <= 42)
+		if (i <= 43)
 		{
-			while (i <= 42)
+			while (i <= 43)
 			{
 				comList = get<1>(CommandList[i]);
-				if (command == comList && command != "exit")
+				if (command == comList && command != "exit" && command != "clear")
 				{
 					cout << "No file loaded yet." << endl;
 					break;
@@ -342,7 +528,7 @@ int main()
 				i++;
 			}
 		}
-		if (i > 42 && command != "exit" && command != "load")
+		if (i > 43 && command != "exit" && command != "load" && command != "clear")
 			cout << "Error: Unknown command" << endl;
 	} while (command != "exit");
 }
