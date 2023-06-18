@@ -50,6 +50,9 @@ string trimStr(string str)
     string nstr;
 
     nstr = str.substr(0, str.find(","));
+    if (nstr.at(0) == '\n'||nstr.at(0)==' ')
+        nstr = nstr.substr(1);
+
     return (nstr);
 }
 
@@ -105,7 +108,8 @@ int ft_load(string filename, int &cols, int &rows, vector<string> &titles, vecto
 {
     ifstream file;
     file.open(filename);
-    if (!file.is_open()) {
+    if (!file.is_open())
+    {
         cout << "File not found!" << endl;
         return (0);
     }
@@ -115,48 +119,48 @@ int ft_load(string filename, int &cols, int &rows, vector<string> &titles, vecto
     for (int i = 0; i < cols; i++)
     {
         file >> str;
-		str = trimStr(str);
+        str = trimStr(str);
         titles.push_back(str);
     }
     for (int i = 0; i < cols; i++)
     {
         file >> str;
-		str = trimStr(str);
+        str = trimStr(str);
         types.push_back(str);
     }
 
-	sdata.resize(rows);
+    sdata.resize(rows);
     ndata.resize(rows);
     for (int r = 0; r < rows; r++)
     {
-		sdata[r].resize(cols);
+        sdata[r].resize(cols);
         ndata[r].resize(cols);
-		getline(file, str);
-        for (int c = 0; c < cols; c++)
-        {
-			float	num;
-            string	str;
-            if (types[c] == "string")
-            {
-				// file >> str;
-				getline(file, str, ',');
-				cout << str;
-				str = trimStr(str);
-				sdata[r][c] = str;
-				// cout << sdata[r][c] << " ";
 
-            }
-			else if (types[c] == "number")
-			{
-				// cout << "test" << endl;
-				file >> str;
+        float num;
+        string str;
+        int c = 0, c1 = 0, c2 = 0;
+        while (c < cols)
+        {
+            if (types[c] == "number")
+            {
+                file >> str;
                 num = stof(trimStr(str));
-				ndata[r][c] = num;
-                // cout << ndata[r][c] << " ";
-			}
+                ndata[r][c1] = num;
+                c1++;
+            }
+            else if (types[c] == "string")
+            {
+
+                if (c < cols - 1)
+                    getline(file, str, ',');
+                else
+                    file >> str;
+                str = trimStr(str);
+                sdata[r][c2] = str;
+                c2++;
+            }
+            c++;
         }
-		cout << endl;
-        // data.push_back(line);
     }
     file.close();
     return (1);
@@ -183,19 +187,32 @@ void    ft_store(string filename, int cols, int rows, vector<string> titles, vec
 	file << endl;
     for (int r = 0; r < rows; r++)
     {
-        for (int c = 0; c < cols; c++)
+		int c = 0;
+		int	c1, c2;
+		c1 = c2 = 0;
+		while (c < cols)
 		{
 			if (types[c] == "number")
-				file << ndata[r][c];
+			{
+				file << ndata[r][c1];
+				if (c != cols - 1)
+					file << ", ";
+				c1++;
+			}
 			else
-				file << sdata[r][c];
-			if (c != cols - 1)
-				file << ", ";
+			{
+				file << sdata[r][c2];
+				if (c != cols - 1)
+					file << ", ";
+				c2++;
+			}
+			c++;
 		}
 		file << endl;
     }
     file.close();
 }
+// done
 
 void    ft_clone(string filename)
 {
@@ -220,13 +237,14 @@ void    ft_clone(string filename)
     inFile.close();
     outFile.close();
 }
+// done
 
 void	ft_names(int cols, int rows, vector<string> titles, vector<string> types, vector<vector<string>> sdata, vector<vector<float>> ndata)
 {
 	for (int r = 0; r <rows; r++)
 	{
 		for (int c = 0; c < cols; c++)
-		 if (titles[c] == "ID")
+		 if (titles[c] == "Location")
 		 	cout << sdata[r][c] << endl;
 	}
 }
@@ -264,23 +282,29 @@ void    ft_html(string filename, int cols, int rows, vector<string> titles, vect
     }
     for (int r = 0; r < rows; r++) {
 		file << "<tr>" << endl;
+		int	c1, c2;
+		c1 = c2 = 0;
         for (int c = 0; c < cols; c++)
 		{
 			if (types[c] == "number")
 			{
 				string	tmp;
-				tmp = to_string(ndata[r][c]);
+				tmp = to_string(ndata[r][c1]);
 				file << "<td>" + tmp + "</td>" << endl;
+				c1++;
 			}
 			else
-				file << "<td>" + sdata[r][c] + "</td>" << endl;
-			
+			{
+				file << "<td>" + sdata[r][c2] + "</td>" << endl;
+				c2++;
+			}
 		}
         file << "</tr>" << endl;
     }
     file << "</table>" << endl;
     file.close();
 }
+// done
 
 void    ft_html2(string filename)
 {
@@ -296,6 +320,7 @@ void    ft_html2(string filename)
 	ft_load(file1, cols, rows, titles, types, sdata, ndata);
 	ft_html(file2, cols, rows, titles, types, sdata, ndata);
 }
+// done
 
 /****************************/
 /*			Part 4			*/
@@ -314,6 +339,7 @@ void	ft_delete_row(int r, int &cols, int &rows, vector<string> &titles, vector<s
 	rows -= 1;
 	cout << "Row deleted" << endl;
 }
+// done
 
 void	ft_delete_col(string param, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
@@ -338,6 +364,7 @@ void	ft_delete_col(string param, int &cols, int &rows, vector<string> &titles, v
 	}
 	cols -= 1;
 }
+// done
 
 void	ft_delete_occur(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
@@ -349,17 +376,21 @@ void	ft_delete_occur(string params, int &cols, int &rows, vector<string> &titles
 	srow = rows;
 	for (int r = srow - 1; r >= 0; r--)
 	{
+		int c1 = 0;
 		for (int c = 0; c < scol; c++)
 		{
-			if (titles[c] == colName && ndata[r][c] == colNum)
+			cout << ndata[r][c1] << endl;
+			if (titles[c] == colName && ndata[r][c1] == colNum)
 			{
-				// int rowNum = r - 1;
 				ft_delete_row(r, cols, rows, titles, types, sdata, ndata);
 				break;
 			}
+			if (types[c] == "number")
+				c1++;
 		}
 	}
 }
+// done
 
 void	ft_delete(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
@@ -377,6 +408,7 @@ void	ft_delete(string params, int &cols, int &rows, vector<string> &titles, vect
 	else
 		cout << "Delete command invalid." << endl;
 }
+// done
 
 void	ft_insert(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
@@ -385,17 +417,64 @@ void	ft_insert(string params, int &cols, int &rows, vector<string> &titles, vect
 	sdata.resize(rows + 1, vector<string>(cols));
 	ndata.resize(rows + 1, vector<float>(cols));
 	rows += 1;
+	int	c1, c2;
+	c1 = c2 = 0;
 	for (int c = 0; c < cols; c++)
 	{
 		str = getFirstParameter(params);
 		if (types[c] == "number")
-			ndata[rows - 1][c] = stof(str);
+		{
+			ndata[rows - 1][c1] = stof(str);
+			c1++;
+		}
 		else
-			sdata[rows - 1][c] = str;
-		cout << "test" << endl;
+		{
+			sdata[rows - 1][c2] = str;
+			c2++;
+		}
 		params = params.substr(params.find(" ") + 1, params.length());
 	}
 }
+// done
+
+void	ft_replace(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
+{
+	int	target, sub;
+	target = stoi(getFirstParameter(params));
+	sub = stoi(params.substr(params.find(" ") + 1, params.length()));
+
+	for (int r = 0; r < rows; r++)
+	{
+		for (int c = 0; c < cols; c++)
+			if (ndata[r][c] == target)
+				ndata[r][c] = sub;
+	}
+}
+// done
+
+void	ft_replace2(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
+{
+	int	target, sub;
+	string	targetCol;
+
+	targetCol = getFirstParameter(params);
+	params = params.substr(params.find(" ") + 1, params.length());
+	target = stoi(getFirstParameter(params));
+	sub = stoi(params.substr(params.find(" ") + 1, params.length()));
+
+	for (int r = 0; r < rows; r++)
+	{
+		int	c1 = 0;
+		for (int c = 0; c < cols; c++)
+		{
+			if (titles[c] == targetCol && ndata[r][c1] == target)
+				ndata[r][c1] = sub;
+			if (types[c] == "number")
+				c1++;
+		}
+	}
+}
+// done
 
 /****************************/
 /*			Main F.			*/
@@ -511,6 +590,10 @@ int main()
 						ft_delete(filename, cols, rows, titles, types, sdata, ndata);
 					else if (command == "insert")
 						ft_insert(filename, cols, rows, titles, types, sdata, ndata);
+					else if (command == "replace" && num_parameter == 3)
+						ft_replace(filename, cols, rows, titles, types, sdata, ndata);
+					else if (command == "replace" && num_parameter == 4)
+						ft_replace2(filename, cols, rows, titles, types, sdata, ndata);
 
 					else if (command == "exit")
 						cout << "Exiting" << endl;
