@@ -85,14 +85,39 @@ void printSum(int cols, int rows, vector<string> titles, vector<vector<float>> n
     cout << "Sum: " << sum << endl;
 }
 
-float trimNum(string str)
+int	checkNum(string str)
 {
-    float   nnum;
+	int i = 0;
 
-    str = str.substr(0, str.find(","));
-    nnum = stof(str);
-    return (nnum);
+	while (str[i])
+	{
+		if (str[i] == ' ')
+			i++;
+		if (str[i] < '0' || str[i] > '9')
+		{
+			cout << "Parameter is not a valid number" << endl;
+			return (0);
+		}
+		i++;
+	}
+	return (1);
 }
+
+int	checkTitle(string str, int rows, vector<string> titles)
+{
+	int i = 0;
+
+	str = getFirstParameter(str);
+	while (i < rows)
+	{
+		if (titles[i] == str)
+			return (1);
+		i++;
+	}
+	cout << "Title not found." << endl;
+	return (0);
+}
+
 
 void    *initArr(int cols, int rows, vector<s_data> &data)
 {
@@ -106,7 +131,6 @@ void    *initArr(int cols, int rows, vector<s_data> &data)
 
 int ft_load(string filename, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
-	// ammend to handle only one param.
 	if (filename.length() < 4 || filename.substr(filename.length() - 4) != ".csv") 
     {
         cout << "Invalid file." << endl;
@@ -173,8 +197,6 @@ int ft_load(string filename, int &cols, int &rows, vector<string> &titles, vecto
 
 void    ft_store(string filename, int cols, int rows, vector<string> titles, vector<string> types, vector<vector<string>> sdata, vector<vector<float>> ndata)
 {
-	// ammend to handle only one param.
-
 	if (filename.length() < 4 || filename.substr(filename.length() - 4) != ".csv") 
     {
         cout << "Invalid file." << endl;
@@ -221,13 +243,11 @@ void    ft_store(string filename, int cols, int rows, vector<string> titles, vec
 		file << endl;
     }
     file.close();
+	cout << "Data has been stored into " << filename << "." << endl;
 }
-// not done
 
 void    ft_clone(string filename)
 {
-	// ammend to handle only two param.
-
     string  file1, file2;
     string  line;
 
@@ -238,7 +258,6 @@ void    ft_clone(string filename)
         cout << "Invalid file." << endl;
 		return ;
     }
-
     ifstream inFile(file1);
     ofstream outFile(file2);
     if (inFile && outFile) {
@@ -254,13 +273,10 @@ void    ft_clone(string filename)
     inFile.close();
     outFile.close();
 }
-// not done
 
 void    ft_html(string filename, int cols, int rows, vector<string> titles, vector<string> types, vector<vector<string>> sdata, vector<vector<float>> ndata)
 {
-	// ammend to handle specific file type.
-
-	if (filename.length() < 5 && filename.substr(filename.length() - 4) != ".html") 
+	if (filename.length() < 5 || filename.substr(filename.length() - 5) != ".html") 
     {
         cout << "Invalid file." << endl;
 		return ;
@@ -296,13 +312,11 @@ void    ft_html(string filename, int cols, int rows, vector<string> titles, vect
     }
     file << "</table>" << endl;
     file.close();
+	cout << "Data has been formated and stored into " << filename << "." << endl;
 }
-// not done
 
 void    ft_html2(string filename)
 {
-	// ammend to handle specific file types.
-
 	string file1, file2;
 	int	cols, rows;
 	vector<string> titles;
@@ -312,10 +326,19 @@ void    ft_html2(string filename)
 
 	file1 = getFirstParameter(filename);
 	file2 = filename.substr(filename.find(" ") + 1, filename.length());
+	if (file1.length() < 4 || file1.substr(file1.length() - 4) != ".csv") 
+    {
+        cout << "Invalid file." << endl;
+		return;
+    }
+	if (file2.length() < 5 || file2.substr(file2.length() - 5) != ".html") 
+    {
+        cout << "Invalid file." << endl;
+		return;
+    }
 	ft_load(file1, cols, rows, titles, types, sdata, ndata);
 	ft_html(file2, cols, rows, titles, types, sdata, ndata);
 }
-// not done
 
 /****************************/
 /*			Part 4			*/
@@ -327,9 +350,8 @@ void	ft_delete_row(int r, int &cols, int &rows, vector<string> &titles, vector<s
     ndata.erase(ndata.begin() + r); // Remove the row from ndata
 
 	rows -= 1;
-	cout << "Row deleted" << endl;
+	cout << "Row has been deleted" << endl;
 }
-// done
 
 void	ft_delete_col(string param, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
@@ -360,8 +382,8 @@ void	ft_delete_col(string param, int &cols, int &rows, vector<string> &titles, v
 		}
 	}
 	cols -= 1;
+	cout << "Column has been deleted." << endl;
 }
-// done
 
 void	ft_delete_occur(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
@@ -386,25 +408,38 @@ void	ft_delete_occur(string params, int &cols, int &rows, vector<string> &titles
 		}
 	}
 }
-// done
 
 void	ft_delete(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
+	int	num_param = wordCounter(params);
 	string	dltCommand = getFirstParameter(params);
 	params = params.substr(params.find(" ") + 1, params.length());
-	if (dltCommand == "occurrence")
-		ft_delete_occur(params, cols, rows, titles, types, sdata, ndata);
-	else if (dltCommand == "row")
+	if (dltCommand == "occurrence" && num_param == 3)
 	{
-		int	rowNum = stoi(params) - 1;
-		ft_delete_row(rowNum, cols, rows, titles, types, sdata, ndata);
+		if (checkTitle(params, rows, titles))
+			ft_delete_occur(params, cols, rows, titles, types, sdata, ndata);
 	}
-	else if (dltCommand == "column")
-		ft_delete_col(params, cols, rows, titles, types, sdata, ndata);
+	else if (dltCommand == "row" && num_param == 2)
+	{
+		if (checkNum(params))
+		{
+			int	rowNum = stoi(params) - 1;
+			if (rowNum >= rows)
+			{
+				cout << "The input has exceeded the available rows." << endl;
+				return ;
+			}
+			ft_delete_row(rowNum, cols, rows, titles, types, sdata, ndata);
+		}
+	}
+	else if (dltCommand == "column" && num_param == 2)
+	{
+		if (checkTitle(params, rows, titles))
+			ft_delete_col(params, cols, rows, titles, types, sdata, ndata);
+	}
 	else
 		cout << "Delete command invalid." << endl;
 }
-// done
 
 void	ft_insert(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
@@ -430,8 +465,8 @@ void	ft_insert(string params, int &cols, int &rows, vector<string> &titles, vect
 		}
 		params = params.substr(params.find(" ") + 1, params.length());
 	}
+	cout << "Data is inserted to the last row." << endl;
 }
-// done
 
 void	ft_replace(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
@@ -445,8 +480,8 @@ void	ft_replace(string params, int &cols, int &rows, vector<string> &titles, vec
 			if (ndata[r][c] == target)
 				ndata[r][c] = sub;
 	}
+	cout << "Every number " << target << " has been replaced with " << sub << "." << endl;
 }
-// done
 
 void	ft_replace2(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
@@ -469,8 +504,8 @@ void	ft_replace2(string params, int &cols, int &rows, vector<string> &titles, ve
 				c1++;
 		}
 	}
+	cout << "Every number " << target << " in the column " << targetCol << " has been replaced with " << sub << "." << endl;
 }
-// done
 
 /****************************/
 /*			Main F.			*/
@@ -553,49 +588,92 @@ int main()
 			vector<vector<string>>	sdata;
 			vector<vector<float>>	ndata;
 
-			filename = commandLine.substr(commandLine.find(" ") + 1);
-			if (ft_load(filename, cols, rows, titles, types, sdata, ndata) && num_parameter == 2)
+			if (num_parameter != 2)
+				cout << "Invalid number of parameters." << endl;
+			else
 			{
-				cout << filename << " is loaded." << endl;
-				do
+				filename = commandLine.substr(commandLine.find(" ") + 1);
+				if (ft_load(filename, cols, rows, titles, types, sdata, ndata))
 				{
-					cout << "$ ";
-					getline(cin, commandLine);
-					command = getFirstParameter(commandLine);
-					num_parameter = wordCounter(commandLine);
-                    filename = commandLine.substr(commandLine.find(" ") + 1);
+					cout << filename << " is loaded." << endl;
+					do
+					{
+						cout << "$ ";
+						getline(cin, commandLine);
+						command = getFirstParameter(commandLine);
+						num_parameter = wordCounter(commandLine);
+						filename = commandLine.substr(commandLine.find(" ") + 1);
 
-					if (command == "load")
-						cout << "Error: Do not load multiple files." << endl;
-					else if (command == "clear")
-						system("cls");
-					/****** Part 1 ******/
-                    else if (command == "store")
-						ft_store(filename, cols, rows, titles, types, sdata, ndata);
-                    else if (command == "clone")
-						ft_clone(filename);
-					else if (command == "html" && num_parameter == 2)
-						ft_html(filename, cols, rows, titles, types, sdata, ndata);
-                    else if (command == "html" && num_parameter == 3)
-						ft_html2(filename);
+						if (command == "load")
+							cout << "Error: Do not load multiple files." << endl;
+						else if (command == "clear")
+							system("cls");
+						/****** Part 1 ******/
+						else if (command == "store")
+						{
+							if (num_parameter == 2)
+								ft_store(filename, cols, rows, titles, types, sdata, ndata);
+							else
+								cout << "Invalid number of parameters." << endl;
+						}
+						else if (command == "clone")
+						{
+							if (num_parameter == 3)
+								ft_clone(filename);
+							else
+								cout << "Invalid number of parameters." << endl;
+						}
+						else if (command == "html")
+						{
+							if (num_parameter == 2)
+								ft_html(filename, cols, rows, titles, types, sdata, ndata);
+							else if (num_parameter == 3)
+								ft_html2(filename);
+							else
+								cout << "Invalid number of parameters." << endl;
+						}
+						
+						/****** Part 4 ******/
+						else if (command == "delete" && (num_parameter == 3 || num_parameter == 4))
+							ft_delete(filename, cols, rows, titles, types, sdata, ndata);
+						else if (command == "insert")
+						{
+							string str = getFirstParameter(filename);
+							if (str == "row")
+							{
+								if (num_parameter == cols + 2)
+								{
+									string param = filename.substr(filename.find(" ") + 1);
+									ft_insert(param, cols, rows, titles, types, sdata, ndata);
+								}
+								else
+									cout << "Wrong number of parameter." << endl;
+							}
+							else
+								cout << "Error: Command not found." << endl;
+						}
+						else if (command == "replace" && num_parameter == 3)
+						{
+							if (checkNum(filename))
+								ft_replace(filename, cols, rows, titles, types, sdata, ndata);
+						}
+						else if (command == "replace" && num_parameter == 4)
+						{
+							string colTitle = getFirstParameter(filename);
+							string tmp = filename.substr(filename.find(" ") + 1);
+							if (checkTitle(colTitle, rows, titles))
+							{
+								if (checkNum(tmp))
+									ft_replace2(filename, cols, rows, titles, types, sdata, ndata);
+							}
+						}
 
-					// html show invalid num of param when wrong param.
-					
-					/****** Part 4 ******/
-					else if (command == "delete" && (num_parameter == 3 || num_parameter == 4))
-						ft_delete(filename, cols, rows, titles, types, sdata, ndata);
-					else if (command == "insert")
-						ft_insert(filename, cols, rows, titles, types, sdata, ndata);
-					else if (command == "replace" && num_parameter == 3)
-						ft_replace(filename, cols, rows, titles, types, sdata, ndata);
-					else if (command == "replace" && num_parameter == 4)
-						ft_replace2(filename, cols, rows, titles, types, sdata, ndata);
-
-					else if (command == "exit")
-						cout << "Exiting" << endl;
-					else
-						cout << "Error: Command not found." << endl;
-				} while (command != "exit");
+						else if (command == "exit")
+							cout << "Exiting" << endl;
+						else
+							cout << "Error: Command not found." << endl;
+					} while (command != "exit");
+				}
 			}
 		}
 		if (i <= 43)
