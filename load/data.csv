@@ -3,10 +3,10 @@
 ID, Age, Math, Science, Malay, Location
 string, number, number, number, number, string
 12213053, 20, 96, 88, 87, Cheras
-21305373, 20, 35, 27, 75, Cheras
+21305373, 20, 80, 27, 75, Cheras
 11920111, 20, 75, 95, 69, Cheras
 11920112, 20, 72, 83, 53, Cheras
-11920113, 20, 0, 86, 100, Cheras
+11920113, 20, 80, 86, 90, Cheras
 11920114, 20, 62, 84, 70, Cheras
 12388888, 20, 76, 87, 83, Cheras
 29176969, 20, 88, 88, 88, KL
