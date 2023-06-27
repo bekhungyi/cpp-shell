@@ -3,17 +3,21 @@
 #include <iomanip>
 #include <string>
 #include <vector>
+#include <tuple>
+
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define WHITE "\033[0m"
 
 using namespace std;
 
-struct s_data
-{
-    string id;
-    float age;
-    float math;
-    float science;
-    float malay;
-};
+void printRed(string message) {
+    cout << RED << "Error: " << message << WHITE << endl;
+}
+
+void printGreen(string message) {
+    cout << GREEN << message << WHITE << endl;
+}
 
 string getFirstParameter(string str)
 {
@@ -23,7 +27,7 @@ string getFirstParameter(string str)
 	{
 		FirstParameter = FirstParameter + str[i];
 		i++;
-	} while ((str[i] != ' ' && str[i] != '\0')); // ‘\0" indicates end of the string
+	} while ((str[i] != ' ' && str[i] != '\0')); // '\0' indicates end of the string
 												 // loop until the first space is found or the end of the string is reached
 	return FirstParameter;
 }
@@ -49,53 +53,41 @@ string trimStr(string str)
 {
 	string nstr;
 
-    nstr = str.substr(0, str.find(","));
+    nstr = str.substr(0, str.find(","));			// used to trim off the "," character at the end of string
     if (nstr.at(0) == '\n' || nstr.at(0)==' ')
-        nstr = nstr.substr(1);
+        nstr = nstr.substr(1);						// handles unwanted condition when the first character is a space/newline
 
     return (nstr);
 }
 
-void printData(int cols, int rows, const vector<s_data *> data)
-{
-    for (int r = 0; r < rows; r++)
-	{
-        s_data line = *data[r];
-        cout << "ID: " << line.id << " ";
-        cout << "Age: " << line.age << " ";
-        cout << "Math: " << line.math << " ";
-        cout << "Science: " << line.science << " ";
-        cout << "Malay: " << line.malay << " ";
-        cout << endl;
-    }
-}
-
-void printSum(int cols, int rows, vector<string> titles, vector<vector<float>> ndata)
-{
-    int sum = 0;
-
-    for (int r = 0; r < rows; r++)
-	{
-        for (int c = 0; c < cols; c++)
-		{
-			if (titles[c] == "Malay")
-				sum += ndata[r][c];
-		}
-    }
-    cout << "Sum: " << sum << endl;
-}
-
 int	checkNum(string str)
 {
-	int i = 0;
-
+	int i = 0;				// used to check whether str is a valid number
+							// before converting into float
 	while (str[i])
 	{
 		if (str[i] == ' ')
 			i++;
 		if (str[i] < '0' || str[i] > '9')
 		{
-			cout << "Parameter is not a valid number" << endl;
+			printRed("Parameter is not a valid number");
+			return (0);
+		}
+		i++;
+	}
+	return (1);
+}
+
+int	checkNum2(string str)          // same function as checkNum, but without cout
+{
+	int i = 0;		
+
+	while (str[i])
+	{
+		if (str[i] == ' ' || str[i] == '.')
+			i++;
+		if (str[i] < '0' || str[i] > '9')
+		{
 			return (0);
 		}
 		i++;
@@ -105,7 +97,7 @@ int	checkNum(string str)
 
 int	checkTitle(string str, int rows, vector<string> titles)
 {
-	int i = 0;
+	int i = 0;		// checks whether the string is a valid titles found within the loaded data
 
 	str = getFirstParameter(str);
 	while (i < rows)
@@ -114,79 +106,72 @@ int	checkTitle(string str, int rows, vector<string> titles)
 			return (1);
 		i++;
 	}
-	cout << "Title not found." << endl;
+	printRed("Title not found");
 	return (0);
 }
 
-
-void    *initArr(int cols, int rows, vector<s_data> &data)
+// ft_load loads data from the csv file and stores it into cols & rows variables and
+// title, type, sdata & ndata vectors.
+int		ft_load(string filename, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
-    for (int i = 0; i < rows; i++)
+	if (filename.length() < 4 || filename.substr(filename.length() - 4) != ".csv")
     {
-        s_data temp;
-        data.push_back(temp);
-    }
-    return (0);
-}
-
-int ft_load(string filename, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
-{
-	if (filename.length() < 4 || filename.substr(filename.length() - 4) != ".csv") 
-    {
-        cout << "Invalid file." << endl;
+        printRed("Invalid file.");	// if the file is not csv filetype, cout invalid file.
 		return (0);
     }
     ifstream file;
     file.open(filename);
     if (!file.is_open())
     {
-        cout << "File not found!" << endl;
+        printRed("File not found.");
         return (0);
     }
     file >> cols;
     file >> rows;
     string str;
-    for (int i = 0; i < cols; i++)
+    for (int i = 0; i < cols; i++)	//loop for reading and storing the row of titles
     {
         file >> str;
         str = trimStr(str);
-        titles.push_back(str);
+        titles.push_back(str);		// store values into titles vector
     }
-    for (int i = 0; i < cols; i++)
+    for (int i = 0; i < cols; i++)	// loop for reading and storing the row of data types
     {
         file >> str;
         str = trimStr(str);
-        types.push_back(str);
+        types.push_back(str);		// store values into types vector
     }
+									// vector <vector <"data type"> > creates a 2D array of the data type
 
-    sdata.resize(rows);
-    ndata.resize(rows);
+    sdata.resize(rows);				// allocates memory so that sdata & ndata
+    ndata.resize(rows);				// has sufficient rows to store vectors within it
     for (int r = 0; r < rows; r++)
     {
-        sdata[r].resize(cols);
-        ndata[r].resize(cols);
+        sdata[r].resize(cols);		// allocates memory so that the row of sdata & ndata
+        ndata[r].resize(cols);		// has sufficient cols to store string/float within it
 
         float num;
         string 	str;
         int c = 0, c1 = 0, c2 = 0;
         while (c < cols)
         {
-            if (types[c] == "number")
+			// goes through columns one by one and check if this column is a number or string
+            if (types[c] == "number")	// store data of float type into vector of ndata
             {
                 file >> str;
-                num = stof(trimStr(str));
+                num = stof(trimStr(str));	// converts the string into float before storing into ndata vector
                 ndata[r][c1] = num;
-                c1++;
+                c1++;	// brings the index to the next col in ndata to store the next data
             }
-            else if (types[c] == "string")
+            else if (types[c] == "string")	//store data of string type into vector of sdata
             {
-                if (c < cols - 1)
-                    getline(file, str, ',');
+                if (c < cols - 1)	//if it is not the last column
+                    getline(file, str, ',');	// handles space characters within a string, like "Mc Donald"
                 else
                     file >> str;
                 str = trimStr(str);
                 sdata[r][c2] = str;
-                c2++;
+                c2++;	// brings the index to the next col in sdata to store the next data
             }
             c++;
         }
@@ -195,30 +180,34 @@ int ft_load(string filename, int &cols, int &rows, vector<string> &titles, vecto
     return (1);
 }
 
+// ft_store writes all the active data (ie: cols, rows, titles, types, sdata and ndata)
+// into the specified csv file
 void    ft_store(string filename, int cols, int rows, vector<string> titles, vector<string> types, vector<vector<string>> sdata, vector<vector<float>> ndata)
 {
 	if (filename.length() < 4 || filename.substr(filename.length() - 4) != ".csv") 
     {
-        cout << "Invalid file." << endl;
+        printRed("Invalid file.");		// if the file is not csv filetype, cout invalid file.
 		return ;
     }
     ofstream file;
     file.open(filename);
-
 	file << cols << endl;
 	file << rows << endl;
 	for (int c = 0; c < cols; c++) {
 		file << titles[c];
-		if (c != cols - 1)
-			file << ", ";
+		if (c != cols - 1)			// check if the index is at the last column,
+			file << ", ";			// if not last col, write ", " before writing the next data
 	}
 	file << endl;
 	for (int c = 0; c < cols; c++) {
 		file << types[c];
-		if (c != cols - 1)
-			file << ", ";
+		if (c != cols - 1)			// check if the index is at the last column,
+			file << ", ";			// if not last col, write ", " before writing the next data
 	}
 	file << endl;
+	
+	// uses the same concept as ft_load to go through columns one by one
+	// determines whether the current column should be string or number and write accordingly
     for (int r = 0; r < rows; r++)
     {
 		int c = 0, c1 = 0, c2 = 0;
@@ -243,9 +232,10 @@ void    ft_store(string filename, int cols, int rows, vector<string> titles, vec
 		file << endl;
     }
     file.close();
-	cout << "Data has been stored into " << filename << "." << endl;
+	cout << GREEN << "Data has been stored into " << filename << "." << WHITE << endl;
 }
 
+// ft_clone copies the exact content from one csv file and writes to another CSV file
 void    ft_clone(string filename)
 {
     string  file1, file2;
@@ -255,66 +245,69 @@ void    ft_clone(string filename)
     file2 = filename.substr(filename.find(" ") + 1, filename.length());
 	if (file1.length() < 4 || file1.substr(file1.length() - 4) != ".csv" || file2.length() < 4 || file2.substr(file2.length() - 4) != ".csv") 
     {
-        cout << "Invalid file." << endl;
+        printRed("Invalid file.");
 		return ;
     }
     ifstream inFile(file1);
     ofstream outFile(file2);
-    if (inFile && outFile) {
-  
+    if (inFile && outFile)
+	{
+		// uses a while loop to run getline to fetch lines one by one
+		// and then writes into output file before going into another loop
         while (getline(inFile, line)) {
             outFile << line << "\n";
         }
-        cout << "Finished copying.\n";
+        printGreen("Finished copying.");
     }
-    else {
-        printf("Cannot access File.");
-    }
+    else 
+		printRed("Cannot access File.");
     inFile.close();
     outFile.close();
 }
 
+// ft_html takes the active data, format it and write into the html file
 void    ft_html(string filename, int cols, int rows, vector<string> titles, vector<string> types, vector<vector<string>> sdata, vector<vector<float>> ndata)
 {
-	if (filename.length() < 5 || filename.substr(filename.length() - 5) != ".html") 
-    {
-        cout << "Invalid file." << endl;
+	// this function just adds specific tags at the beginning and ending of string
+	// before writing it into the html file.
+	if (filename.length() < 5 || filename.substr(filename.length() - 5) != ".html") {
+        printRed("Invalid file.");
 		return ;
     }
     ofstream file;
     file.open(filename);
-	file << "<style>table {border-collapse: collapse;}th, td {padding: 5px;border: 1px solid black;}</style>" << endl;
-    file << "<table>" << endl;
+	// line 268 is css used for formating the datas within the table for ease of reading.
+	file << "<html><head><style>table {border-collapse: collapse;}th, td {padding: 5px;border: 1px solid black;}</style></head>" << endl;
+    file << "<body><table>" << endl;
 	for (int i = 0; i < cols; i++) {
-		titles[i] = "<th>" + titles[i] + "</th>";
+		titles[i] = "<th>" + titles[i] + "</th>";	//"<th>" is used to bold the titles
         file << titles[i] << endl;
     }
     for (int r = 0; r < rows; r++) {
 		file << "<tr>" << endl;
 		int	c1, c2;
 		c1 = c2 = 0;
-        for (int c = 0; c < cols; c++)
-		{
-			if (types[c] == "number")
-			{
+        for (int c = 0; c < cols; c++) {
+			if (types[c] == "number") {
 				string	tmp;
 				tmp = to_string(ndata[r][c1]);
 				file << "<td>" + tmp + "</td>" << endl;
 				c1++;
 			}
-			else
-			{
+			else {
 				file << "<td>" + sdata[r][c2] + "</td>" << endl;
 				c2++;
 			}
 		}
         file << "</tr>" << endl;
     }
-    file << "</table>" << endl;
+    file << "</table></body></html>" << endl;
     file.close();
-	cout << "Data has been formated and stored into " << filename << "." << endl;
+	cout << GREEN << "Data has been formated and stored into " << filename << "." << WHITE << endl;
 }
 
+// ft_html2 combines ft_load and ft_html to load data from a csv file
+// then formats and writes the data into the html file.
 void    ft_html2(string filename)
 {
 	string file1, file2;
@@ -328,15 +321,15 @@ void    ft_html2(string filename)
 	file2 = filename.substr(filename.find(" ") + 1, filename.length());
 	if (file1.length() < 4 || file1.substr(file1.length() - 4) != ".csv") 
     {
-        cout << "Invalid file." << endl;
+        printRed("Invalid file.");
 		return;
     }
 	if (file2.length() < 5 || file2.substr(file2.length() - 5) != ".html") 
     {
-        cout << "Invalid file." << endl;
+        printRed("Invalid file.");
 		return;
     }
-	ft_load(file1, cols, rows, titles, types, sdata, ndata);
+	ft_load(file1, cols, rows, titles, types, sdata, ndata);	
 	ft_html(file2, cols, rows, titles, types, sdata, ndata);
 }
 
@@ -344,15 +337,18 @@ void    ft_html2(string filename)
 /*			Part 4			*/
 /****************************/
 
+// ft_delete_row deletes the row "r" from the data by removing it
+// from sdata and ndata vectors.
 void	ft_delete_row(int r, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
-	sdata.erase(sdata.begin() + r); // Remove the row from sdata
-    ndata.erase(ndata.begin() + r); // Remove the row from ndata
+	sdata.erase(sdata.begin() + r);	// to erase the specified row from sdata vector
+    ndata.erase(ndata.begin() + r);	// to erase the specified row from ndata vector
 
 	rows -= 1;
-	cout << "Row has been deleted" << endl;
 }
 
+// ft_delete_col deletes a specific column from the data by removing it
+// from the title, type, sdata, and ndata vectors.
 void	ft_delete_col(string param, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
 	for (int r = 0; r < rows; r++)
@@ -363,9 +359,9 @@ void	ft_delete_col(string param, int &cols, int &rows, vector<string> &titles, v
 			if (titles[c] == param)
 			{
 				if (types[c] == "string")
-					sdata[r].erase(sdata[r].begin() + c1);
+					sdata[r].erase(sdata[r].begin() + c1);	// to erase data of the specified column from sdata vector
 				else
-					ndata[r].erase(ndata[r].begin() + c2);
+					ndata[r].erase(ndata[r].begin() + c2);	// to erase data of the specified column from ndata vector
 			}
 			if (types[c] == "string")
 				c1++;
@@ -377,44 +373,54 @@ void	ft_delete_col(string param, int &cols, int &rows, vector<string> &titles, v
 	{
 		if (titles[c] == param)
 		{
-			titles.erase(titles.begin() + c);
-			types.erase(types.begin() + c);
+			titles.erase(titles.begin() + c);	// to erase the titles of the specified column
+			types.erase(types.begin() + c);		// to erase the types of the specified column
 		}
 	}
 	cols -= 1;
-	cout << "Column has been deleted." << endl;
+	printGreen("Column has been deleted.\nStore the active data into file to view the latest version.");
 }
 
+// ft_delete_occur deletes the row(s) where a specific value occurs
+// in the specified column.
 void	ft_delete_occur(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
-	int scol, srow;
-	string	colName = getFirstParameter(params);
-	float	colNum = stof(params.substr(params.find(" ") + 1, params.length()));
+	int scol, srow, i;
+	string	colName = getFirstParameter(params);	// to get the first parameter after the command
+	float	colNum = stof(params.substr(params.find(" ") + 1, params.length()));	// to get the second parameter after the command
 
+	i = 0;
 	scol = cols;
 	srow = rows;
-	for (int r = srow - 1; r >= 0; r--)
+	for (int r = srow - 1; r >= 0; r--)		// starting from the last row so that we don't go out of range of the rows exist if some rows have been deleted.
 	{
 		int c1 = 0;
 		for (int c = 0; c < scol; c++)
 		{
-			if (titles[c] == colName && ndata[r][c1] == colNum)
+			if (titles[c] == colName && ndata[r][c1] == colNum)		// if it matched
 			{
 				ft_delete_row(r, cols, rows, titles, types, sdata, ndata);
+				i++;
 				break;
 			}
 			if (types[c] == "number")
 				c1++;
 		}
 	}
+	if (i == 0)
+		cout << "No occurrence found. Nothing is deleted" << endl;
+	else
+		printGreen("Row has been deleted.\nStore the active data into file to view the latest version.");
 }
 
+// ft_delete is a upper level function that determines which type of deletion
+// operation should be performed based on the given parameters.
 void	ft_delete(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
 	int	num_param = wordCounter(params);
-	string	dltCommand = getFirstParameter(params);
-	params = params.substr(params.find(" ") + 1, params.length());
-	if (dltCommand == "occurrence" && num_param == 3)
+	string	dltCommand = getFirstParameter(params);		// to get only one parameter after the delete command
+	params = params.substr(params.find(" ") + 1, params.length());		// to get the parameters excluding the command
+	if (dltCommand == "occurrence" && num_param == 3)	// if the command format is correct
 	{
 		if (checkTitle(params, rows, titles))
 			ft_delete_occur(params, cols, rows, titles, types, sdata, ndata);
@@ -424,12 +430,13 @@ void	ft_delete(string params, int &cols, int &rows, vector<string> &titles, vect
 		if (checkNum(params))
 		{
 			int	rowNum = stoi(params) - 1;
-			if (rowNum >= rows)
+			if (rowNum >= rows || rowNum == -1)		// if the user input row which does not exist
 			{
-				cout << "The input has exceeded the available rows." << endl;
+				printRed("The input row is out of range. Nothing is deleted");
 				return ;
 			}
 			ft_delete_row(rowNum, cols, rows, titles, types, sdata, ndata);
+			printGreen("Row has been deleted.\nStore the active data into file to view the latest version.");
 		}
 	}
 	else if (dltCommand == "column" && num_param == 2)
@@ -438,14 +445,16 @@ void	ft_delete(string params, int &cols, int &rows, vector<string> &titles, vect
 			ft_delete_col(params, cols, rows, titles, types, sdata, ndata);
 	}
 	else
-		cout << "Delete command invalid." << endl;
+		printRed("Delete command invalid.");
 }
 
+// ft_insert inserts a new row of data into
+// the active sdata and ndata vectors.
 void	ft_insert(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
 	string str;
 
-	sdata.resize(rows + 1, vector<string>(cols));
+	sdata.resize(rows + 1, vector<string>(cols));	// to allocate memory for a new row to store new data
 	ndata.resize(rows + 1, vector<float>(cols));
 	rows += 1;
 	int	c1, c2;
@@ -465,46 +474,95 @@ void	ft_insert(string params, int &cols, int &rows, vector<string> &titles, vect
 		}
 		params = params.substr(params.find(" ") + 1, params.length());
 	}
-	cout << "Data is inserted to the last row." << endl;
+	printGreen("Data is inserted to the last row.\nStore the active data into file to view the latest version.");
 }
 
-void	ft_replace(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
+// ft_replace goes through the entire data and replaces
+// occurrences of the target value with the sub value
+void	ft_replace(string params, int& cols, int& rows, vector<string>& titles, vector<string>& types, vector<vector<string>>& sdata, vector<vector<float>>& ndata)
 {
-	float	target, sub;
-	target = stof(getFirstParameter(params));
-	sub = stof(params.substr(params.find(" ") + 1, params.length()));
+	int	i = 0;
+    string target = getFirstParameter(params);
+    string sub = params.substr(params.find(" ") + 1, params.length());
 
-	for (int r = 0; r < rows; r++)
-	{
-		for (int c = 0; c < cols; c++)
-			if (ndata[r][c] == target)
-				ndata[r][c] = sub;
+    for (int r = 0; r < rows; r++)
+    {
+        for (int c = 0; c < cols; c++)
+        {
+            if (sdata[r][c] == target)
+            {
+                sdata[r][c] = sub;
+				i++;
+            }
+        }
+    }
+	if (checkNum2(target) && checkNum2(sub))	// to check whether target and sub is a valid number(which is not alphabet)
+	{											// before converting into float	and storing into ndata vector								
+		float	ftarget, fsub;
+		ftarget = stof(target);
+		fsub = stof(sub);
+		for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                if (ndata[r][c] == ftarget)
+                {
+                    ndata[r][c] = fsub;
+					i++;
+                }
+            }
+        }
 	}
-	cout << "Every number " << target << " has been replaced with " << sub << "." << endl;
+	if (i == 0)
+		cout << "No occurrence found, nothing is replaced." << endl;
+	else
+    	cout << GREEN << "Every occurrence of " << target << " has been replaced with " << sub << "." << WHITE << endl;
 }
 
+// ft_replace2 goes through the specific column and replaces
+// occurrences of the target value with the sub value
 void	ft_replace2(string params, int &cols, int &rows, vector<string> &titles, vector<string> &types, vector<vector<string>> &sdata, vector<vector<float>> &ndata)
 {
-	float	target, sub;
+	int	i = 0;
 	string	targetCol;
+	string	target, sub;
+	float	ftarget, fsub;
 
 	targetCol = getFirstParameter(params);
 	params = params.substr(params.find(" ") + 1, params.length());
-	target = stof(getFirstParameter(params));
-	sub = stof(params.substr(params.find(" ") + 1, params.length()));
+	target = getFirstParameter(params);
+	sub = params.substr(params.find(" ") + 1, params.length());
 
 	for (int r = 0; r < rows; r++)
 	{
-		int	c1 = 0;
+		int	c1 = 0, c2 = 0;
 		for (int c = 0; c < cols; c++)
 		{
-			if (titles[c] == targetCol && ndata[r][c1] == target)
-				ndata[r][c1] = sub;
+
 			if (types[c] == "number")
+			{
+				if (titles[c] == targetCol && ndata[r][c1] == stof(target))
+				{
+					ndata[r][c1] = stof(sub);
+					i++;
+				}
 				c1++;
+			}
+			if (types[c] == "string")
+			{
+				if (titles[c] == targetCol && sdata[r][c2] == target)
+				{
+					sdata[r][c2] = sub;
+					i++;
+				}
+				c2++;
+			}
 		}
 	}
-	cout << "Every number " << target << " in the column " << targetCol << " has been replaced with " << sub << "." << endl;
+	if (i == 0)
+		cout << "No occurrence found, nothing is replaced." << endl;
+	else
+		cout << GREEN << "Every number " << target << " in the column " << targetCol << " has been replaced with " << sub << ".\nStore the active data into file to view the latest version." << WHITE << endl;
 }
 
 /****************************/
@@ -589,13 +647,13 @@ int main()
 			vector<vector<float>>	ndata;
 
 			if (num_parameter != 2)
-				cout << "Invalid number of parameters." << endl;
+				printRed("Invalid number of parameters.");
 			else
 			{
 				filename = commandLine.substr(commandLine.find(" ") + 1);
 				if (ft_load(filename, cols, rows, titles, types, sdata, ndata))
 				{
-					cout << filename << " is loaded." << endl;
+					cout << GREEN << filename << " is loaded." << WHITE << endl;
 					do
 					{
 						cout << "$ ";
@@ -604,8 +662,8 @@ int main()
 						num_parameter = wordCounter(commandLine);
 						filename = commandLine.substr(commandLine.find(" ") + 1);
 
-						if (command == "load")
-							cout << "Error: Do not load multiple files." << endl;
+						if (command == "load")			// to avoid loading multiple files at once
+							printRed("Do not load multiple files.");
 						else if (command == "clear")
 							system("cls");
 						/****** Part 1 ******/
@@ -614,14 +672,14 @@ int main()
 							if (num_parameter == 2)
 								ft_store(filename, cols, rows, titles, types, sdata, ndata);
 							else
-								cout << "Invalid number of parameters." << endl;
+								printRed("Invalid number of parameters.");
 						}
 						else if (command == "clone")
 						{
 							if (num_parameter == 3)
 								ft_clone(filename);
 							else
-								cout << "Invalid number of parameters." << endl;
+								printRed("Invalid number of parameters.");
 						}
 						else if (command == "html")
 						{
@@ -630,7 +688,7 @@ int main()
 							else if (num_parameter == 3)
 								ft_html2(filename);
 							else
-								cout << "Invalid number of parameters." << endl;
+								printRed("Invalid number of parameters.");
 						}
 						
 						/****** Part 4 ******/
@@ -647,31 +705,26 @@ int main()
 									ft_insert(param, cols, rows, titles, types, sdata, ndata);
 								}
 								else
-									cout << "Wrong number of parameter." << endl;
+									printRed("Invalid number of parameters.");
 							}
 							else
-								cout << "Error: Command not found." << endl;
+								printRed("Command not found.");
 						}
 						else if (command == "replace" && num_parameter == 3)
 						{
-							if (checkNum(filename))
-								ft_replace(filename, cols, rows, titles, types, sdata, ndata);
+							ft_replace(filename, cols, rows, titles, types, sdata, ndata);
 						}
 						else if (command == "replace" && num_parameter == 4)
 						{
 							string colTitle = getFirstParameter(filename);
-							string tmp = filename.substr(filename.find(" ") + 1);
 							if (checkTitle(colTitle, rows, titles))
-							{
-								if (checkNum(tmp))
-									ft_replace2(filename, cols, rows, titles, types, sdata, ndata);
-							}
+								ft_replace2(filename, cols, rows, titles, types, sdata, ndata);
 						}
 
 						else if (command == "exit")
 							cout << "Exiting" << endl;
 						else
-							cout << "Error: Command not found." << endl;
+							printRed("Command not found.");
 					} while (command != "exit");
 				}
 			}
@@ -690,6 +743,6 @@ int main()
 			}
 		}
 		if (i > 43 && command != "exit" && command != "load" && command != "clear")
-			cout << "Error: Unknown command" << endl;
+			printRed("Unknown command");
 	} while (command != "exit");
 }
